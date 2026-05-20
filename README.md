@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/yeasirafgan/martinaai/actions/workflows/ci.yml/badge.svg)](https://github.com/yeasirafgan/martinaai/actions/workflows/ci.yml)
 
+**Live demo:** [martinaai.vercel.app](https://martinaai.vercel.app)
+
 A production-ready AI chat application built with **FastAPI**, **Claude API**, and **Next.js**. Features real-time streaming responses, multi-turn conversation memory, and a clean ChatGPT-style interface.
 
 ---
