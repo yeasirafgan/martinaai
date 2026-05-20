@@ -1,8 +1,8 @@
 # Martinaai
 
-A production-ready AI chat application built with **FastAPI**, **Claude API**, and **Next.js**. Features real-time streaming responses, multi-turn conversation memory, and a clean ChatGPT-style interface.
+[![CI](https://github.com/yeasirafgan/martinaai/actions/workflows/ci.yml/badge.svg)](https://github.com/yeasirafgan/martinaai/actions/workflows/ci.yml)
 
-**Live demo:** _coming soon_
+A production-ready AI chat application built with **FastAPI**, **Claude API**, and **Next.js**. Features real-time streaming responses, multi-turn conversation memory, and a clean ChatGPT-style interface.
 
 ---
 
@@ -21,7 +21,8 @@ A production-ready AI chat application built with **FastAPI**, **Claude API**, a
 - **Streaming responses** — tokens stream to the UI in real time via `StreamingResponse`
 - **Instant mode** — full response with animated loading indicator
 - **Conversation memory** — full message history sent on every request so Claude remembers context
-- **Multi-chat sidebar** — create, switch between, and delete conversations, just like ChatGPT
+- **Multi-chat sidebar** — create, switch between, and delete conversations
+- **Error handling** — rate limits, API errors, and connection failures return proper HTTP responses
 - **REST API** — clean endpoints for both single-turn and multi-turn use cases
 - **Interactive API docs** — Swagger UI at `/docs`, ReDoc at `/redoc`
 - **Dockerised** — single `docker compose up` runs the full stack
@@ -34,10 +35,34 @@ A production-ready AI chat application built with **FastAPI**, **Claude API**, a
 |---|---|
 | Backend | Python 3.11, FastAPI, Uvicorn |
 | AI | Anthropic Claude API (`claude-sonnet-4-6`) |
-| Validation | Pydantic v2 |
+| Validation | Pydantic v2, pydantic-settings |
 | Frontend | Next.js 14, React 18, Tailwind CSS |
+| Testing | pytest, httpx |
+| CI | GitHub Actions |
 | Containerisation | Docker, Docker Compose |
 | Deploy | Railway (backend), Vercel (frontend) |
+
+---
+
+## Architecture
+
+```
+Browser
+  │
+  ▼
+Next.js (port 4000)
+  │  fetch POST /conversation/stream
+  ▼
+FastAPI (port 3000)
+  │  AsyncAnthropic.messages.stream()
+  ▼
+Claude API
+  │  text chunks
+  ▼
+FastAPI StreamingResponse  ──►  Next.js ReadableStream  ──►  UI renders token by token
+```
+
+Each user message is sent with the full conversation history so Claude maintains context across turns. For non-streaming mode, `/conversation` returns the complete response in one JSON payload.
 
 ---
 
@@ -103,25 +128,36 @@ UI runs at `http://localhost:4000`
 
 ---
 
+## Tests
+
+```bash
+cd backend
+pip install -r requirements.txt
+pytest tests/ -v
+```
+
+---
+
 ## Project Structure
 
 ```
 martinaai/
+├── .github/workflows/ci.yml  # GitHub Actions — lint + test on every push
 ├── backend/
-│   ├── config.py          # Settings loaded from .env via pydantic-settings
-│   ├── models.py          # Pydantic request/response schemas
-│   ├── ai_client.py       # Claude API — streaming + regular, chat + conversation
-│   ├── main.py            # FastAPI app, CORS, all routes
+│   ├── config.py             # Settings loaded from .env via pydantic-settings
+│   ├── models.py             # Pydantic request/response schemas
+│   ├── ai_client.py          # Claude API — streaming + regular, error handling
+│   ├── main.py               # FastAPI app, CORS, all routes
+│   ├── tests/
+│   │   └── test_endpoints.py
 │   ├── requirements.txt
 │   ├── Dockerfile
 │   └── docker-compose.yml
-│
 └── frontend/
-    ├── src/
-    │   └── components/
-    │       ├── Chat.tsx         # Main layout, state, API calls
-    │       ├── MessageBubble.tsx
-    │       └── InputBar.tsx
+    ├── src/components/
+    │   ├── Chat.tsx          # State, API calls, conversation management
+    │   ├── MessageBubble.tsx
+    │   └── InputBar.tsx
     ├── Dockerfile
     └── docker-compose.yml
 ```
@@ -158,7 +194,10 @@ ALLOWED_ORIGINS=http://localhost:4000
 
 ## Author
 
-**Yeasir Afgan** — mid-level developer transitioning to AI Engineering.
-Building a portfolio of production AI systems targeting UK remote roles.
+**Yeasir Afgan** — [GitHub](https://github.com/yeasirafgan)
 
-- GitHub: [github.com/yeasirafgan](https://github.com/yeasirafgan)
+---
+
+## Licence
+
+[MIT](LICENSE)
