@@ -1,0 +1,14 @@
+name: martinaai-frontend
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "4000:3000"
+    env_file:
+      - .env.local
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
