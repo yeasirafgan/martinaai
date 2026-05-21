@@ -21,6 +21,7 @@ export default function Chat() {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [streamMode, setStreamMode] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const activeConversation = conversations.find(c => c.id === activeId) ?? null
@@ -122,12 +123,22 @@ export default function Chat() {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-60 bg-white border-r border-gray-200 flex flex-col p-5 shrink-0">
+      <aside className={`fixed inset-y-0 left-0 z-40 w-60 bg-white border-r border-gray-200 flex flex-col p-5 shrink-0 transition-transform duration-200
+        md:static md:translate-x-0
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <h1 className="text-lg font-bold text-gray-900 tracking-tight mb-6">Martinaai</h1>
 
         <button
-          onClick={() => setActiveId(null)}
+          onClick={() => { setActiveId(null); setSidebarOpen(false) }}
           className="w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors mb-3"
         >
           + New chat
@@ -142,7 +153,7 @@ export default function Chat() {
               }`}
             >
               <button
-                onClick={() => setActiveId(conv.id)}
+                onClick={() => { setActiveId(conv.id); setSidebarOpen(false) }}
                 className={`flex-1 text-left text-sm px-3 py-2 truncate ${
                   conv.id === activeId ? 'text-purple-700 font-medium' : 'text-gray-600'
                 }`}
@@ -187,7 +198,20 @@ export default function Chat() {
 
       {/* Main */}
       <main className="flex-1 flex flex-col min-w-0">
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        {/* Mobile header */}
+        <div className="md:hidden flex items-center px-4 py-3 border-b border-gray-200 bg-white">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-1 rounded-lg hover:bg-gray-100 text-gray-600"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <span className="ml-3 font-semibold text-gray-800">Martinaai</span>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-6">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center text-white text-xl font-bold mb-4">

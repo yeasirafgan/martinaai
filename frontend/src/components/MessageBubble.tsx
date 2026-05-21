@@ -19,7 +19,7 @@ export default function MessageBubble({ message, isStreaming }: Props) {
         </div>
       )}
       <div
-        className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+        className={`max-w-[88%] md:max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
           isUser
             ? 'bg-blue-600 text-white rounded-br-none'
             : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm'

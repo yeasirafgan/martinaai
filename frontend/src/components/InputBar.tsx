@@ -23,7 +23,7 @@ export default function InputBar({ onSend, disabled }: Props) {
   }
 
   return (
-    <div className="border-t border-gray-200 bg-white px-6 py-4">
+    <div className="border-t border-gray-200 bg-white px-4 py-4 md:px-6">
       <div className="flex items-end gap-3 max-w-3xl mx-auto">
         <textarea
           value={value}
