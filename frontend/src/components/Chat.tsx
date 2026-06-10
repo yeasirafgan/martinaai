@@ -76,7 +76,7 @@ export default function Chat() {
         if (!res.ok || !res.body) throw new Error('API error')
 
         const reader = res.body.getReader()
-        const decoder = new TextDecoder()
+        const decoder = new TextDecoder('utf-8', { stream: true })
 
         while (true) {
           const { done, value } = await reader.read()

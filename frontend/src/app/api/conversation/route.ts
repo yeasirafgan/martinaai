@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify(body),
     })
-    const data = await res.json()
+    const data = await res.json().catch(() => ({ detail: 'Invalid response from backend' }))
     return NextResponse.json(data, { status: res.status })
   } catch {
     return NextResponse.json({ detail: 'Failed to reach backend' }, { status: 502 })

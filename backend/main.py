@@ -15,18 +15,22 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins.split(","),
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "X-API-Key"],
 )
 
 _SKIP_AUTH = {"/", "/health"}
 
 
+@app.on_event("startup")
+async def startup_check():
+    if not settings.api_key:
+        raise RuntimeError("API_KEY environment variable is not set. Refusing to start.")
+
+
 @app.middleware("http")
 async def verify_api_key(request: Request, call_next):
     if request.url.path in _SKIP_AUTH:
-        return await call_next(request)
-    if not settings.api_key:
         return await call_next(request)
     incoming = request.headers.get("X-API-Key", "")
     if not incoming or incoming != settings.api_key:
