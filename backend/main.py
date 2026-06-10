@@ -1,6 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 
 from config import settings
 from models import ChatRequest, ChatResponse, ConversationRequest, ConversationResponse
@@ -18,6 +18,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+_SKIP_AUTH = {"/", "/health"}
+
+
+@app.middleware("http")
+async def verify_api_key(request: Request, call_next):
+    if request.url.path in _SKIP_AUTH:
+        return await call_next(request)
+    if not settings.api_key:
+        return await call_next(request)
+    incoming = request.headers.get("X-API-Key", "")
+    if not incoming or incoming != settings.api_key:
+        return JSONResponse(status_code=401, content={"detail": "Invalid or missing API key"})
+    return await call_next(request)
 
 
 @app.get("/")

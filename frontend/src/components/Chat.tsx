@@ -14,7 +14,8 @@ interface Conversation {
   messages: Message[]
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
 
 export default function Chat() {
   const [conversations, setConversations] = useState<Conversation[]>([])
@@ -70,7 +71,7 @@ export default function Chat() {
       if (streamMode) {
         const res = await fetch(`${API_URL}/conversation/stream`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
           body: JSON.stringify({ messages: history, max_tokens: 1024 }),
         })
 
@@ -95,7 +96,7 @@ export default function Chat() {
       } else {
         const res = await fetch(`${API_URL}/conversation`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
           body: JSON.stringify({ messages: history, max_tokens: 1024 }),
         })
 
