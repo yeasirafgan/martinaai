@@ -5,6 +5,8 @@ from main import app
 
 client = TestClient(app)
 
+AUTH = {"X-API-Key": "dummy_api_key_for_tests"}
+
 
 def test_root():
     response = client.get("/")
@@ -22,13 +24,23 @@ def test_health():
 
 
 def test_chat_empty_message():
-    response = client.post("/chat", json={"message": "  "})
+    response = client.post("/chat", json={"message": "  "}, headers=AUTH)
     assert response.status_code == 400
 
 
 def test_conversation_empty_messages():
-    response = client.post("/conversation", json={"messages": []})
+    response = client.post("/conversation", json={"messages": []}, headers=AUTH)
     assert response.status_code == 400
+
+
+def test_missing_api_key_returns_401():
+    response = client.post("/chat", json={"message": "Hi"})
+    assert response.status_code == 401
+
+
+def test_wrong_api_key_returns_401():
+    response = client.post("/chat", json={"message": "Hi"}, headers={"X-API-Key": "wrong-key"})
+    assert response.status_code == 401
 
 
 @patch("ai_client.client")
@@ -40,7 +52,7 @@ def test_chat_success(mock_client):
     mock_response.usage.output_tokens = 5
     mock_client.messages.create = AsyncMock(return_value=mock_response)
 
-    response = client.post("/chat", json={"message": "Hi"})
+    response = client.post("/chat", json={"message": "Hi"}, headers=AUTH)
     assert response.status_code == 200
     assert response.json()["reply"] == "Hello!"
 
@@ -59,6 +71,6 @@ def test_conversation_success(mock_client):
         {"role": "assistant", "content": "Nice to meet you, Yeasir."},
         {"role": "user", "content": "What is my name?"},
     ]
-    response = client.post("/conversation", json={"messages": messages})
+    response = client.post("/conversation", json={"messages": messages}, headers=AUTH)
     assert response.status_code == 200
     assert response.json()["reply"] == "I remember you."
